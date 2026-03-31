@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS household (
   updated_at        INTEGER NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS setting (
+CREATE TABLE IF NOT EXISTS "setting" (
   key           TEXT PRIMARY KEY,
   value         TEXT,
   updated_at    INTEGER NOT NULL
@@ -124,7 +124,7 @@ CREATE TABLE IF NOT EXISTS account_snapshot (
 -- 5. TRANSACTIONS & IMPORTING
 -- =============================================================================
 
-CREATE TABLE IF NOT EXISTS transaction (
+CREATE TABLE IF NOT EXISTS "transaction" (
   id                      TEXT PRIMARY KEY,
   household_id            TEXT NOT NULL REFERENCES household(id) ON DELETE CASCADE,
   account_id              TEXT REFERENCES account(id) ON DELETE SET NULL,
