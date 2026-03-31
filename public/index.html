@@ -6,18 +6,10 @@
     <title>Envelope Budget App</title>
 </head>
 <body>
-    <h1>Envelope Budget App</h1>
-    <p>Database Status: Check the browser console (F12) for isolation status.</p>
+    <h1>Blueprint for Mission Budgeting App</h1>
+    <p>Database Status: Check the browser console (F12).</p>
 
     <script src="https://cdn.jsdelivr.net/npm/@sqlite.org/sqlite-wasm@3.45.1/jswasm/sqlite3.js"></script>
-
-    <script>
-      window.addEventListener('load', () => {
-        console.log("Window loaded, injecting database.js...");
-        const script = document.createElement('script');
-        script.src = 'database.js';
-        document.body.appendChild(script);
-      });
-    </script>
+    <script src="database.js"></script>
 </body>
 </html>
