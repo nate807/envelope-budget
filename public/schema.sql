@@ -12,7 +12,7 @@ PRAGMA synchronous = NORMAL;
 -- 1. CORE HOUSEHOLD & SETTINGS
 -- =============================================================================
 
-CREATE TABLE IF NOT EXISTS household (
+CREATE TABLE IF NOT EXISTS "household" (
   id                TEXT PRIMARY KEY, -- UUID
   name              TEXT NOT NULL DEFAULT 'Our Budget',
   license_key       TEXT,
@@ -40,7 +40,7 @@ INSERT OR IGNORE INTO setting (key, value, updated_at) VALUES
 -- 2. ENVELOPE STRUCTURE & TEMPLATES
 -- =============================================================================
 
-CREATE TABLE IF NOT EXISTS envelope_group (
+CREATE TABLE IF NOT EXISTS "envelope_group" (
   id            TEXT PRIMARY KEY,
   household_id  TEXT NOT NULL REFERENCES household(id) ON DELETE CASCADE,
   name          TEXT NOT NULL,
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS envelope_group (
   updated_at    INTEGER NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS envelope (
+CREATE TABLE IF NOT EXISTS "envelope" (
   id            TEXT PRIMARY KEY,
   household_id  TEXT NOT NULL REFERENCES household(id) ON DELETE CASCADE,
   group_id      TEXT REFERENCES envelope_group(id) ON DELETE SET NULL, [cite: 79]
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS envelope (
   updated_at    INTEGER NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS budget_template (
+CREATE TABLE IF NOT EXISTS "budget_template" (
   id            TEXT PRIMARY KEY,
   household_id  TEXT NOT NULL REFERENCES household(id) ON DELETE CASCADE,
   envelope_id   TEXT NOT NULL REFERENCES envelope(id) ON DELETE CASCADE,
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS budget_template (
 -- 3. MONTHLY BUDGETING & ALLOCATIONS
 -- =============================================================================
 
-CREATE TABLE IF NOT EXISTS budget_month (
+CREATE TABLE IF NOT EXISTS "budget_month" (
   id              TEXT PRIMARY KEY,
   household_id    TEXT NOT NULL REFERENCES household(id) ON DELETE CASCADE,
   year            INTEGER NOT NULL,
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS budget_month (
   UNIQUE(household_id, year, month)
 );
 
-CREATE TABLE IF NOT EXISTS envelope_allocation (
+CREATE TABLE IF NOT EXISTS "envelope_allocation" (
   id              TEXT PRIMARY KEY,
   budget_month_id TEXT NOT NULL REFERENCES budget_month(id) ON DELETE CASCADE,
   envelope_id     TEXT NOT NULL REFERENCES envelope(id) ON DELETE CASCADE,
@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS envelope_allocation (
 -- 4. ACCOUNTS & NET WORTH
 -- =============================================================================
 
-CREATE TABLE IF NOT EXISTS account (
+CREATE TABLE IF NOT EXISTS "account" (
   id                    TEXT PRIMARY KEY,
   household_id          TEXT NOT NULL REFERENCES household(id) ON DELETE CASCADE,
   name                  TEXT NOT NULL,
@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS account (
   updated_at            INTEGER NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS account_snapshot (
+CREATE TABLE IF NOT EXISTS "account_snapshot" (
   id            TEXT PRIMARY KEY,
   account_id    TEXT NOT NULL REFERENCES account(id) ON DELETE CASCADE,
   balance_cents INTEGER NOT NULL,
@@ -147,7 +147,7 @@ CREATE TABLE IF NOT EXISTS "transaction" (
   updated_at              INTEGER NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS transaction_split (
+CREATE TABLE IF NOT EXISTS "transaction_split" (
   id              TEXT PRIMARY KEY,
   transaction_id  TEXT NOT NULL REFERENCES transaction(id) ON DELETE CASCADE,
   envelope_id     TEXT NOT NULL REFERENCES envelope(id) ON DELETE RESTRICT,
@@ -156,7 +156,7 @@ CREATE TABLE IF NOT EXISTS transaction_split (
   updated_at      INTEGER NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS bank_mapping (
+CREATE TABLE IF NOT EXISTS "bank_mapping" (
   id              TEXT PRIMARY KEY,
   household_id    TEXT NOT NULL REFERENCES household(id) ON DELETE CASCADE,
   label           TEXT NOT NULL, -- e.g., "Chase Checking" [cite: 62]
@@ -217,14 +217,14 @@ JOIN envelope_allocation ea ON ea.envelope_id = e.id
 WHERE e.archived_at IS NULL;
 
 -- Inbox View for unassigned items [cite: 91, 172]
-CREATE VIEW IF NOT EXISTS v_inbox AS
+CREATE VIEW IF NOT EXISTS "v_inbox" AS
 SELECT t.*, a.name AS account_name
 FROM transaction t
 LEFT JOIN account a ON t.account_id = a.id
 WHERE t.assigned_at IS NULL AND (t.import_status IS NULL OR t.import_status IN ('pending', 'likely_duplicate'));
 
 -- Net Worth View [cite: 111, 174]
-CREATE VIEW IF NOT EXISTS v_net_worth_current AS
+CREATE VIEW IF NOT EXISTS "v_net_worth_current" AS
 SELECT
   SUM(CASE WHEN type IN ('checking','savings','investment','retirement') THEN balance_cents ELSE 0 END) AS assets,
   SUM(CASE WHEN type IN ('credit_card','loan','mortgage') THEN balance_cents ELSE 0 END) AS liabilities,
@@ -232,7 +232,7 @@ SELECT
 FROM account WHERE is_archived = 0;
 
 -- Debt Payoff View [cite: 113, 116, 176]
-CREATE VIEW IF NOT EXISTS v_debt_summary AS
+CREATE VIEW IF NOT EXISTS "v_debt_summary" AS
 SELECT
   id, name, type, balance_cents, debt_original_cents,
   CASE WHEN debt_original_cents > 0 THEN ROUND((1.0 - (CAST(balance_cents AS REAL) / debt_original_cents)) * 100, 1) ELSE 0 END AS percent_paid
@@ -242,7 +242,7 @@ FROM account WHERE type IN ('credit_card', 'loan', 'mortgage') AND is_archived =
 -- 7. MIGRATIONS
 -- =============================================================================
 
-CREATE TABLE IF NOT EXISTS schema_migration (
+CREATE TABLE IF NOT EXISTS "schema_migration" (
   version     INTEGER PRIMARY KEY,
   applied_at  INTEGER NOT NULL,
   description TEXT NOT NULL

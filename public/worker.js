@@ -11,7 +11,8 @@ self.sqlite3InitModule({
         console.log("✅ Worker: Database opened in OPFS.");
 
         // FIX: Ensure we are fetching the schema from the root correctly
-        const response = await fetch('schema.sql'); 
+        // Change your fetch line to this:
+        const response = await fetch('schema.sql?v=' + Date.now());
         
         if (!response.ok) {
             throw new Error(`Could not find schema.sql (Status: ${response.status})`);
