@@ -1,4 +1,3 @@
-// Load the library inside the worker
 importScripts('sqlite3.js');
 
 self.sqlite3InitModule({
@@ -8,16 +7,26 @@ self.sqlite3InitModule({
     try {
         console.log("🚀 Worker: SQLite3 Loaded.");
 
-        // Now OpfsDb WILL work because we are in a worker thread
         const db = new sqlite3.oo1.OpfsDb('/budget.db', 'c');
         console.log("✅ Worker: Database opened in OPFS.");
 
-        // Apply Schema
-        const response = await fetch('schema.sql');
-        const sqlSchema = await response.text();
-        db.exec(sqlSchema);
+        // FIX: Ensure we are fetching the schema from the root correctly
+        const response = await fetch('/schema.sql'); 
+        
+        if (!response.ok) {
+            throw new Error(`Could not find schema.sql (Status: ${response.status})`);
+        }
 
-        // Success! Send a message back to the main UI
+        const sqlSchema = await response.text();
+
+        // Check if we accidentally got HTML instead of SQL
+        if (sqlSchema.trim().startsWith('<')) {
+            throw new Error("Received HTML instead of SQL. Check your file paths!");
+        }
+
+        db.exec(sqlSchema);
+        console.log("✅ Schema applied successfully!");
+
         postMessage({ type: 'ready' });
 
     } catch (err) {
