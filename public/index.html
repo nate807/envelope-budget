@@ -10,20 +10,21 @@
     <h2>Budgeting App</h2>
     <p>Database Status: Check the browser console (F12).</p>
 
-    <script>
-      // 1. Manually create the script tag for the library
-      const sqliteScript = document.createElement('script');
-      sqliteScript.src = "https://cdn.jsdelivr.net/npm/@sqlite.org/sqlite-wasm@3.45.1/jswasm/sqlite3.js";
-      
-      // 2. ONLY once the library is finished loading, load your database logic
-      sqliteScript.onload = () => {
-        console.log("✅ SQLite Library loaded. Initializing app...");
+<script src="sqlite3.js"></script>
+
+<script>
+  // This waits for the file to be ready
+  window.addEventListener('DOMContentLoaded', () => {
+    console.log("Checking for SQLite library...");
+    if (typeof sqlite3InitModule === 'function') {
+        console.log("✅ Library found locally. Starting database.js...");
         const appScript = document.createElement('script');
         appScript.src = "database.js";
         document.body.appendChild(appScript);
-      };
-
-      document.body.appendChild(sqliteScript);
-    </script>
+    } else {
+        console.error("❌ sqlite3.js was found, but sqlite3InitModule is missing.");
+    }
+  });
+</script>
 </body>
 </html>
