@@ -6,10 +6,24 @@
     <title>Envelope Budget App</title>
 </head>
 <body>
-    <h1>Blueprint for Mission Budgeting App</h1>
+    <h1>Blueprint for Mission</h1>
+    <h2>Budgeting App</h2>
     <p>Database Status: Check the browser console (F12).</p>
 
-    <script src="https://cdn.jsdelivr.net/npm/@sqlite.org/sqlite-wasm@3.45.1/jswasm/sqlite3.js"></script>
-    <script src="database.js"></script>
+    <script>
+      // 1. Manually create the script tag for the library
+      const sqliteScript = document.createElement('script');
+      sqliteScript.src = "https://cdn.jsdelivr.net/npm/@sqlite.org/sqlite-wasm@3.45.1/jswasm/sqlite3.js";
+      
+      // 2. ONLY once the library is finished loading, load your database logic
+      sqliteScript.onload = () => {
+        console.log("✅ SQLite Library loaded. Initializing app...");
+        const appScript = document.createElement('script');
+        appScript.src = "database.js";
+        document.body.appendChild(appScript);
+      };
+
+      document.body.appendChild(sqliteScript);
+    </script>
 </body>
 </html>
